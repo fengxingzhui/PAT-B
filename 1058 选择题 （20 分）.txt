@@ -1,0 +1,88 @@
+1058 选择题 （20 分）
+批改多选题是比较麻烦的事情，本题就请你写个程序帮助老师批改多选题，并且指出哪道题错的人最多。
+
+输入格式：
+输入在第一行给出两个正整数 N（≤ 1000）和 M（≤ 100），分别是学生人数和多选题的个数。随后 M 行，每行顺次给出一道题的满分值（不超过 5 的正整数）、选项个数（不少于 2 且不超过 5 的正整数）、正确选项个数（不超过选项个数的正整数）、所有正确选项。注意每题的选项从小写英文字母 a 开始顺次排列。各项间以 1 个空格分隔。最后 N 行，每行给出一个学生的答题情况，其每题答案格式为 (选中的选项个数 选项1 ……)，按题目顺序给出。注意：题目保证学生的答题情况是合法的，即不存在选中的选项数超过实际选项数的情况。
+
+输出格式：
+按照输入的顺序给出每个学生的得分，每个分数占一行。注意判题时只有选择全部正确才能得到该题的分数。最后一行输出错得最多的题目的错误次数和编号（题目按照输入的顺序从 1 开始编号）。如果有并列，则按编号递增顺序输出。数字间用空格分隔，行首尾不得有多余空格。如果所有题目都没有人错，则在最后一行输出 Too simple。
+
+输入样例：
+3 4 
+3 4 2 a c
+2 5 1 b
+5 3 2 b c
+1 5 4 a b d e
+(2 a c) (2 b d) (2 a c) (3 a b e)
+(2 a c) (1 b) (2 a b) (4 a b d e)
+(2 b d) (1 e) (2 b c) (4 a b c d)
+输出样例：
+3
+6
+5
+2 2 3 4
+
+注意：由于不想用结构体，所以用了个二维数组来记录每题的答案和分数，可能写得有点麻烦？
+
+#include<iostream>
+#include<string>
+using namespace std;
+int main()
+{
+	int N,M;
+	scanf("%d %d\n",&N,&M);
+	int a[M][8]={};
+	for(int i=0;i<M;i++)
+	{
+		string str;
+		getline(cin,str);
+		a[i][0]=str[0]-'0';
+		a[i][1]=str[4]-'0';
+		for(int j=6;j<str.size();j++)
+			if(str[j]<='e'&&str[j]>='a')
+				a[i][str[j]-'a'+2]=1; 
+	}
+		
+	int max=0;
+	for(int i=0;i<N;i++)
+	{
+		string str;
+		getline(cin,str);
+		int left=0,right=0,grade=0;
+		for(int j=0;j<M;j++)
+		{
+			while(str[left]!='(') left++;
+			while(str[right]!=')') right++;
+			string tmp = str.substr(left+1,right-left-1);
+			left++;
+			right++;
+			int flag=1;
+			if(tmp[0]-'0'==a[j][1])
+			{
+				for(int k=2;k<tmp.size();k++)
+				{
+					if(tmp[k]>='a'&&tmp[k]<='e'&&!a[j][tmp[k]-'a'+2])
+					{
+						flag=0;
+						break;
+					}
+				}
+			}
+			else flag=0;
+			if(flag) grade+=a[j][0];
+			else 
+			{
+				a[j][7]++;
+				if(a[j][7]>max) max = a[j][7];
+			}
+		}
+		printf("%d\n",grade);
+	}
+	if(max)
+	{
+		printf("%d",max);	
+		for(int i=0;i<M;i++)
+			if(a[i][7]==max) printf(" %d",i+1);	
+	} 
+	else printf("Too simple\n");	
+}
